@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({port: 8989});
 
-const user = [];
+const users = [];
 
 const broadcast = (data, ws) => {
   wss.clients.forEach(client => {
@@ -12,20 +12,20 @@ const broadcast = (data, ws) => {
   });
 }
 
-wss.on('connection',  (ws) => {
+wss.on('connection',  ws => {
   let index;
   ws.on('message', message => {
-    const data = JSON.parse(message)
+    const data = JSON.parse(message);
     switch (data.type) {
       case 'ADD_USER':
           index = users.length;
           users.push({name: data.name, id: index + 1});
           ws.send(JSON.stringify({
-            type: 'USERS_LIST',
+            type: 'USER_LIST',
             users
           }))
           broadcast({
-            type: 'USERS_LIST',
+            type: 'USER_LIST',
             users
           }, ws);
           break;
@@ -43,7 +43,7 @@ wss.on('connection',  (ws) => {
   ws.on('close', () => {
     users.splice(index, 1);
     broadcast({
-      type: 'USERS_LIST',
+      type: 'USER_LIST',
       users
     }, ws)
   })
